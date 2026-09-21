@@ -1,3 +1,4 @@
+from app.engines.money import to_cents
 from app.engines.tariff_breakdown import calc_fare
 
 
@@ -9,7 +10,7 @@ def compare_day_night(distance_km: float, slow_min: float, tariff: dict) -> dict
         "slow_min": day["slow_min"],
         "day_total": day["total"],
         "night_total": night["total"],
-        "delta": round(night["total"] - day["total"], 2),
+        "delta": to_cents(night["total"] - day["total"]),
         "day": day,
         "night": night,
     }
