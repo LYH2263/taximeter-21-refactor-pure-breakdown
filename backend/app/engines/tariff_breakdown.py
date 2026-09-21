@@ -1,3 +1,6 @@
+from app.engines.money import quantize, to_cents
+
+
 def calc_fare(distance_km: float, slow_min: float, night: bool, tariff: dict) -> dict:
     base = float(tariff["start_price"])
     include = float(tariff["start_include_km"])
@@ -7,14 +10,17 @@ def calc_fare(distance_km: float, slow_min: float, night: bool, tariff: dict) ->
     dist = max(0.0, float(distance_km) - include)
     mile = dist * per_km
     slow = float(slow_min) * per_slow
-    sub = base + mile + slow
+    # 夜间三项 = 白日三项 × 夜间系数，分别出分后再加总为应付。
+    start = to_cents(base * night_f)
+    mileage = to_cents(mile * night_f)
+    slow_fee = to_cents(slow * night_f)
     return {
-        "distance_km": round(float(distance_km), 2),
-        "slow_min": round(float(slow_min), 1),
+        "distance_km": quantize(float(distance_km), 2),
+        "slow_min": quantize(float(slow_min), 1),
         "night": night,
         "night_factor": night_f,
-        "start": round(base * night_f, 2),
-        "mileage": round(mile * night_f, 2),
-        "slow_fee": round(slow * night_f, 2),
-        "total": round(sub * night_f, 2),
+        "start": start,
+        "mileage": mileage,
+        "slow_fee": slow_fee,
+        "total": to_cents(start + mileage + slow_fee),
     }
